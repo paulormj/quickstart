@@ -1,0 +1,65 @@
+schemaVersion: 2.1.0
+metadata:
+  name: quickstart
+  namespace: developer-che
+projects:
+  - git:
+      remotes:
+        origin: 'https://github.com/paulormj/quickstart.git'
+    name: quickstart
+components: 
+  - attributes:
+      app.kubernetes.io/name: nodejs
+      che-theia.eclipse.org/vscode-extensions:
+        - 'https://open-vsx.org/api/vscode/typescript-language-features/1.49.3/file/vscode.typescript-language-features-1.49.3.vsix'
+        - 'https://open-vsx.org/api/ms-vscode/js-debug/1.52.2/file/ms-vscode.js-debug-1.52.2.vsix'
+    container:
+      args:
+        - sh
+        - '-c'
+        - '${PLUGIN_REMOTE_ENDPOINT_EXECUTABLE}'
+      endpoints:
+        - exposure: public
+          name: angular
+          protocol: http
+          targetPort: 4200
+      env:
+        - name: PLUGIN_REMOTE_ENDPOINT_EXECUTABLE
+          value: /remote-endpoint/plugin-remote-endpoint
+        - name: THEIA_PLUGINS
+          value: 'local-dir:///plugins/sidecars/nodejs'
+      image: 'quay.io/devfile/universal-developer-image:ubi8-latest'
+      memoryLimit: 2G
+      mountSources: true
+      sourceMapping: /projects
+      volumeMounts:
+        - name: remote-endpoint
+          path: /remote-endpoint
+        - name: plugins
+          path: /plugins
+    name: nodejs
+commands:
+  - exec:
+      commandLine: yarn install
+      component: nodejs
+      group:
+        kind: build
+      label: Install all required dependencies
+      workingDir: '${PROJECTS_ROOT}/quickstart'
+    id: install
+  - exec:
+      commandLine: yarn build
+      component: nodejs
+      group:
+        kind: build
+      label: Build application
+      workingDir: '${PROJECTS_ROOT}/quickstart'
+    id: build
+  - exec:
+      commandLine: yarn run start --host 0.0.0.0 --disableHostCheck true
+      component: nodejs
+      group:
+        kind: run
+      label: Start application
+      workingDir: '${PROJECTS_ROOT}/quickstart'
+    id: start
