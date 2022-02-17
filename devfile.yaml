@@ -1,7 +1,6 @@
 schemaVersion: 2.1.0
 metadata:
   name: quickstart
-  namespace: developer-che
 projects:
   - git:
       remotes:
